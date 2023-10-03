@@ -4,6 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/logoImageView"
+        android:layout_width="126dp"
+        android:layout_height="126dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:src="@mipmap/ic_launcher_round"
+        />
+
     <LinearLayout
         android:id="@+id/centeredLinearLayout"
         android:layout_width="wrap_content"
@@ -12,38 +21,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textViewQuestion"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="16dp"
+            android:text="How long can you live without smoking ?" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Average Time Between Two Smokes Over the last week"
-                android:gravity="center_vertical"/>
-
-            <EditText
-                android:id="@+id/editTextAverageTimeBetweenTwoSmoke"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:hint="2 hours"
-                android:inputType="none"
-                android:layout_weight="1"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textViewBestTimeSinceLastSmoke"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Best Time without smoking" />
 
             <EditText
                 android:id="@+id/editTextBestTimeSinceLastSmoke"
@@ -53,19 +37,25 @@
                 android:hint="30 Minutes"
                 android:inputType="none"
                 android:layout_weight="1"/>
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textViewCurrentTimeSinceLastSmoke"
+            <EditText
+                android:id="@+id/editTextAverageTimeBetweenTwoSmoke"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Current Time without smoking" />
+                android:layout_gravity="center_horizontal"
+                android:hint="2 hours"
+                android:inputType="none"
+                android:layout_weight="1"/>
+
+
+            <EditText
+                android:id="@+id/editTextMedianTimeBetweenTwoSmoke"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:hint="2 hours"
+                android:inputType="none"
+                android:layout_weight="1"/>
 
             <EditText
                 android:id="@+id/editTextCurrentTimeSinceLastSmoke"
@@ -75,7 +65,6 @@
                 android:hint="30 Minutes"
                 android:inputType="none"
                 android:layout_weight="1"/>
-        </LinearLayout>
 
         <Button
             android:id="@+id/buttonImSmoking"
