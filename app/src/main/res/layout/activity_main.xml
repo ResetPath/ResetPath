@@ -505,6 +505,44 @@
                     />
             </TableRow>
             <TableRow
+            android:paddingVertical="2dp"
+            android:layout_marginVertical="12dp">
+            <TextView
+                android:id="@+id/statusCurrentGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:text="⏳"
+                />
+
+            <TextView
+                android:id="@+id/labelCurrentGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Goal"
+                android:paddingLeft="4dp"
+                android:textStyle="bold"
+                />
+
+            <TextView
+                android:id="@+id/valueCurrentGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:textStyle="bold"
+                android:text="∞"
+                />
+
+            <TextView
+                android:id="@+id/percentCurrentGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:textStyle="bold"
+                android:text="0%"
+                />
+        </TableRow>
+            <TableRow
                 android:paddingVertical="2dp"
                 android:layout_marginVertical="12dp">
                 <TextView

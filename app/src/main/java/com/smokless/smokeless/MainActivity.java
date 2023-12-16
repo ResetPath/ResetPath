@@ -22,10 +22,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewStatusMedianScoreWeek;
     TextView textViewStatusLatestScore;
 
+    TextView textViewStatusCurrentGoal;
     TextView textViewStatusCurrentScore;
 
 
@@ -85,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
     TextView textViewValueLatestScore;
 
+    TextView textViewValueCurrentGoal;
     TextView textViewValueCurrentScore;
+
 
     TextView textViewPercentBestScoreAll;
     TextView textViewPercentAverageScoreAll;
@@ -103,6 +109,9 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewPercentLatestScore;
 
     TextView textViewPercentCurrentScore;
+    TextView textViewPercentCurrentGoal;
+
+    TextView textViewLabelCurrentGoal;
     TextView textViewLabelCurrentScore;
 
 
@@ -119,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
     double percentAverageScoreWeek;
     double percentMedianScoreWeek;
     double percentLatestScore;
+    double percentCurrentGoal;
     double percentCurrentScore;
+
     double latestScore;
 
 
@@ -158,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
         textViewStatusAverageScoreWeek = findViewById(R.id.statusAverageScoreWeek);
         textViewStatusMedianScoreWeek = findViewById(R.id.statusMedianScoreWeek);
         textViewStatusLatestScore = findViewById(R.id.statusLatestScore);
+        textViewStatusCurrentGoal = findViewById(R.id.statusCurrentGoal);
         textViewStatusCurrentScore = findViewById(R.id.statusCurrentScore);
 
         textViewLabelBestScoreAll = findViewById(R.id.labelBestScoreAll);
@@ -173,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
         textViewLabelAverageScoreWeek = findViewById(R.id.labelAverageScoreWeek);
         textViewLabelMedianScoreWeek = findViewById(R.id.labelMedianScoreWeek);
         textViewLabelLatestScore = findViewById(R.id.labelLatestScore);
+        textViewLabelCurrentGoal = findViewById(R.id.labelCurrentGoal);
         textViewLabelCurrentScore = findViewById(R.id.labelCurrentScore);
 
         textViewValueBestScoreAll = findViewById(R.id.valueBestScoreAll);
@@ -188,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
         textViewValueAverageScoreWeek = findViewById(R.id.valueAverageScoreWeek);
         textViewValueMedianScoreWeek = findViewById(R.id.valueMedianScoreWeek);
         textViewValueLatestScore = findViewById(R.id.valueLatestScore);
+        textViewValueCurrentGoal = findViewById(R.id.valueCurrentGoal);
         textViewValueCurrentScore = findViewById(R.id.valueCurrentScore);
 
         textViewPercentBestScoreAll = findViewById(R.id.percentBestScoreAll);
@@ -203,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         textViewPercentAverageScoreWeek = findViewById(R.id.percentAverageScoreWeek);
         textViewPercentMedianScoreWeek = findViewById(R.id.percentMedianScoreWeek);
         textViewPercentLatestScore = findViewById(R.id.percentLatestScore);
+        textViewPercentCurrentGoal = findViewById(R.id.percentCurrentGoal);
         textViewPercentCurrentScore = findViewById(R.id.percentCurrentScore);
         button = findViewById(R.id.buttonImSmoking);
     }
@@ -381,6 +396,89 @@ public class MainActivity extends AppCompatActivity {
         return pi.firstInstallTime;
     }
 
+    private double getStandardDeviation(String scope) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query;
+
+        long installationTimestamp = getInstallationTimestamp();
+        long currentTime = System.currentTimeMillis();
+        Cursor cursor = null;
+
+        try {
+            switch (scope) {
+                // ... (switch cases for year, month, week)
+
+                default:
+                    currentTime = 0;
+                    // Handle invalid scope values here, if necessary
+                    break;
+            }
+
+            // Modify the query based on the selected scope and time range
+            query = "SELECT * FROM " + DatabaseHelper.TABLE_NAME + " WHERE " +
+                    DatabaseHelper.COLUMN_TIMESTAMP + " >= " + currentTime +
+                    " ORDER BY " + DatabaseHelper.COLUMN_TIMESTAMP;
+
+            cursor = db.rawQuery(query, null);
+
+            if (cursor.moveToFirst()) {
+                long previousTimestamp = cursor.getLong(0);
+                int numberOfTimeDifferences = 0;
+                List<Long> timeDifferences = new ArrayList<>();
+
+                while (cursor.moveToNext()) {
+                    long currentTimestamp = cursor.getLong(0);
+                    long timeDifference = currentTimestamp - previousTimestamp;
+                    timeDifferences.add(timeDifference);
+                    numberOfTimeDifferences++;
+                    previousTimestamp = currentTimestamp;
+                }
+
+                if (numberOfTimeDifferences > 0) {
+                    // Remove anomalies (e.g., values beyond a certain threshold)
+                    double mean = calculateMean(timeDifferences);
+                    double stdDev = calculateStandardDeviation(timeDifferences, mean);
+
+                    // Define a threshold, for example, anomalies beyond 3 standard deviations
+                    double threshold = 3 * stdDev;
+
+                    // Remove anomalies by filtering based on the threshold
+                    List<Long> filteredTimeDifferences = timeDifferences.stream()
+                            .filter(diff -> Math.abs(diff - mean) <= threshold)
+                            .collect(Collectors.toList());
+
+                    // Recalculate standard deviation using filtered data
+                    double newMean = calculateMean(filteredTimeDifferences);
+                    double newStdDev = calculateStandardDeviation(filteredTimeDifferences, newMean);
+
+                    return newStdDev;
+                } else {
+                    return 0; // or handle as per your requirement
+                }
+            } else {
+                return 0;
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    // Helper functions for calculating mean and standard deviation
+    private double calculateMean(List<Long> data) {
+        return data.stream().mapToLong(Long::valueOf).average().orElse(0);
+    }
+
+    private double calculateStandardDeviation(List<Long> data, double mean) {
+        double variance = data.stream()
+                .mapToDouble(diff -> Math.pow(diff - mean, 2))
+                .average()
+                .orElse(0);
+        return Math.sqrt(variance);
+    }
+
+
     private long calculateTimeSinceLastSmoke(long lastTimestamp) {
         if (lastTimestamp == 0) {
             return 0;
@@ -424,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // updateCurrentScore()
                 double currentScore = calculateTimeSinceLastSmoke(lastTimestamp);
-                percentCurrentScore = (
+                percentCurrentScore = (((
                                 percentBestScoreAll +
                                 percentAverageScoreAll +
                                 percentMedianScoreAll +
@@ -436,9 +534,8 @@ public class MainActivity extends AppCompatActivity {
                                         percentMedianScoreMonth +
                                         percentBestScoreWeek +
                                         percentAverageScoreWeek +
-                                        percentMedianScoreWeek +
-                                        percentLatestScore
-                ) / 13;
+                                        percentMedianScoreWeek
+                ) / 12) + percentLatestScore + percentCurrentGoal)/3;
                 formatRow(currentScore, textViewStatusCurrentScore, textViewLabelCurrentScore, textViewValueCurrentScore, textViewPercentCurrentScore, currentScore, percentCurrentScore);
                 formatRow(currentScore, textViewStatusLatestScore, textViewLabelLatestScore, textViewValueLatestScore, textViewPercentLatestScore, latestScore, percentLatestScore);
                 double percent = percentCurrentScore;
@@ -474,6 +571,8 @@ public class MainActivity extends AppCompatActivity {
         double bestScoreYear = getBestTime("year");
         double bestScoreMonth = getBestTime("month");
         double bestScoreWeek = getBestTime("week");
+        double standardDeviation = getStandardDeviation("all");
+        double currentGoal = averageScoreAll + standardDeviation*3;
 
         percentBestScoreAll = (currentScore / bestScoreAll) * 100;
         percentAverageScoreAll = (currentScore / averageScoreAll) * 100;
@@ -488,6 +587,7 @@ public class MainActivity extends AppCompatActivity {
         percentAverageScoreWeek = (currentScore / averageScoreWeek) * 100;
         percentMedianScoreWeek = (currentScore / medianScoreWeek) * 100;
         percentLatestScore = (currentScore / latestScore) * 100;
+        percentCurrentGoal = (currentScore / currentGoal) * 100;
 
         SharedPreferences sharedPreferences;
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -549,6 +649,8 @@ public class MainActivity extends AppCompatActivity {
         formatRow(currentScore, textViewStatusBestScoreWeek, textViewLabelBestScoreWeek, textViewValueBestScoreWeek, textViewPercentBestScoreWeek, bestScoreWeek, percentBestScoreWeek);
         formatRow(currentScore, textViewStatusAverageScoreWeek, textViewLabelAverageScoreWeek, textViewValueAverageScoreWeek, textViewPercentAverageScoreWeek, averageScoreWeek, percentAverageScoreWeek);
         formatRow(currentScore, textViewStatusMedianScoreWeek, textViewLabelMedianScoreWeek, textViewValueMedianScoreWeek, textViewPercentMedianScoreWeek, medianScoreWeek, percentMedianScoreWeek);
+
+        formatRow(currentScore, textViewStatusCurrentGoal, textViewLabelCurrentGoal, textViewValueCurrentGoal, textViewPercentCurrentGoal, currentGoal, percentCurrentGoal);
 
     }
 
