@@ -633,6 +633,10 @@ public class MainActivity extends AppCompatActivity {
             if (percentLatestScore > 100) {
                 percentLatestScore = 100;
             }
+
+            if (percentCurrentGoal > 100) {
+                percentCurrentGoal = 100;
+            }
         }
 
         formatRow(currentScore, textViewStatusBestScoreAll, textViewLabelBestScoreAll, textViewValueBestScoreAll, textViewPercentBestScoreAll, bestScoreAll, percentBestScoreAll);
