@@ -60,6 +60,40 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/settingsDifficultyLevel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/settingsStrictMode"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/tvDifficultyLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Difficulty Level"
+            android:textSize="18sp"
+            android:layout_gravity="center_horizontal" />
+
+        <SeekBar
+            android:id="@+id/difficultyLevelSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="0"
+            android:max="4"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/tvDifficultyLevelValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="18sp"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
+
     <!-- Linear Layout for Icons (GitHub, LinkedIn, Email) -->
     <LinearLayout
         android:id="@+id/iconLinearLayout"

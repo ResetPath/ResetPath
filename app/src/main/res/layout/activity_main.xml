@@ -471,7 +471,8 @@
                     />
             </TableRow>
             <TableRow
-                android:paddingVertical="2dp">
+                android:paddingVertical="2dp"
+                android:layout_marginVertical="12dp">
                 <TextView
                     android:id="@+id/statusLatestScore"
                     android:layout_width="wrap_content"

@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -18,7 +19,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView strictModeHelper;
     private SharedPreferences sharedPreferences;
 
-    private static final String PREF_NAME = "SmokeLessPrefs"; // Replace with your preference name
+    private static final String PREF_NAME = "SmokelessPrefs"; // Replace with your preference name
     private static final String KEY_STRICT_MODE = "strictMode";
 
     @Override
@@ -56,6 +57,69 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
+        SeekBar difficultyLevelSeekBar = findViewById(R.id.difficultyLevelSeekBar);
+        TextView tvDifficultyLevelValue = findViewById(R.id.tvDifficultyLevelValue);
+        SharedPreferences sharedPreferences = getSharedPreferences("SmokelessPrefs", MODE_PRIVATE);
+        int difficultyLevel = sharedPreferences.getInt("difficultyLevel", 0);
+        difficultyLevelSeekBar.setProgress(difficultyLevel, true);
+        switch (difficultyLevel) {
+            case 0:
+                tvDifficultyLevelValue.setText("No difficulty just beat your average");
+                break;
+            case 1:
+                tvDifficultyLevelValue.setText("That's a start");
+                break;
+            case 2:
+                tvDifficultyLevelValue.setText("Now we're getting somewhere");
+                break;
+            case 3:
+                tvDifficultyLevelValue.setText("You're gonna make it for sure");
+                break;
+            case 4:
+                tvDifficultyLevelValue.setText("Are you even smoking ?");
+                break;
+        }
+
+        difficultyLevelSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // Update the difficulty level value
+                int difficultyLevel = progress;
+                switch (difficultyLevel) {
+                    case 0:
+                        tvDifficultyLevelValue.setText("No difficulty just beat your average");
+                        break;
+                    case 1:
+                        tvDifficultyLevelValue.setText("That's a start");
+                        break;
+                    case 2:
+                        tvDifficultyLevelValue.setText("Now we're getting somewhere");
+                        break;
+                    case 3:
+                        tvDifficultyLevelValue.setText("You're gonna make it for sure");
+                        break;
+                    case 4:
+                        tvDifficultyLevelValue.setText("Are you even smoking ?");
+                        break;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Save the difficulty level to shared preferences
+                int difficultyLevel = seekBar.getProgress();
+                SharedPreferences sharedPreferences = getSharedPreferences("SmokelessPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("difficultyLevel", difficultyLevel);
+                editor.apply();
+            }
+        });
+
+
     }
 
     public void onMenuIconClicked(View view) {

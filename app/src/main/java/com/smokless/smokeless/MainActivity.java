@@ -572,7 +572,9 @@ public class MainActivity extends AppCompatActivity {
         double bestScoreMonth = getBestTime("month");
         double bestScoreWeek = getBestTime("week");
         double standardDeviation = getStandardDeviation("all");
-        double currentGoal = averageScoreAll + standardDeviation*3;
+        SharedPreferences sharedPreferences = getSharedPreferences("SmokelessPrefs", MODE_PRIVATE);
+        int difficultyLevel = sharedPreferences.getInt("difficultyLevel", 0);
+        double currentGoal = averageScoreAll + standardDeviation * difficultyLevel;
 
         percentBestScoreAll = (currentScore / bestScoreAll) * 100;
         percentAverageScoreAll = (currentScore / averageScoreAll) * 100;
@@ -589,7 +591,6 @@ public class MainActivity extends AppCompatActivity {
         percentLatestScore = (currentScore / latestScore) * 100;
         percentCurrentGoal = (currentScore / currentGoal) * 100;
 
-        SharedPreferences sharedPreferences;
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         boolean isStrictModeEnabled = sharedPreferences.getBoolean(KEY_STRICT_MODE, false);
         if (isStrictModeEnabled) {
