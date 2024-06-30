@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewStatusBestScoreWeek;
     TextView textViewStatusAverageScoreWeek;
     TextView textViewStatusMedianScoreWeek;
-    TextView textViewStatusLatestScore;
 
     TextView textViewStatusCurrentGoal;
     TextView textViewStatusCurrentScore;
@@ -71,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewLabelBestScoreWeek;
     TextView textViewLabelAverageScoreWeek;
     TextView textViewLabelMedianScoreWeek;
-    TextView textViewLabelLatestScore;
 
 
     TextView textViewValueBestScoreAll;
@@ -87,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewValueAverageScoreWeek;
     TextView textViewValueMedianScoreWeek;
 
-    TextView textViewValueLatestScore;
 
     TextView textViewValueCurrentGoal;
     TextView textViewValueCurrentScore;
@@ -106,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewPercentAverageScoreWeek;
     TextView textViewPercentMedianScoreWeek;
 
-    TextView textViewPercentLatestScore;
 
     TextView textViewPercentCurrentScore;
     TextView textViewPercentCurrentGoal;
@@ -127,11 +123,9 @@ public class MainActivity extends AppCompatActivity {
     double percentBestScoreWeek;
     double percentAverageScoreWeek;
     double percentMedianScoreWeek;
-    double percentLatestScore;
     double percentCurrentGoal;
     double percentCurrentScore;
 
-    double latestScore;
 
 
 
@@ -152,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
         timer.schedule(timerTask, 0, 1000);
         initUIBinders();
         lastTimestamp = getLastTimestampInDb();
-        latestScore = calculateLatestScore();
     }
 
     private void initUIBinders() {
@@ -168,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
         textViewStatusBestScoreWeek = findViewById(R.id.statusBestScoreWeek);
         textViewStatusAverageScoreWeek = findViewById(R.id.statusAverageScoreWeek);
         textViewStatusMedianScoreWeek = findViewById(R.id.statusMedianScoreWeek);
-        textViewStatusLatestScore = findViewById(R.id.statusLatestScore);
         textViewStatusCurrentGoal = findViewById(R.id.statusCurrentGoal);
         textViewStatusCurrentScore = findViewById(R.id.statusCurrentScore);
 
@@ -184,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         textViewLabelBestScoreWeek = findViewById(R.id.labelBestScoreWeek);
         textViewLabelAverageScoreWeek = findViewById(R.id.labelAverageScoreWeek);
         textViewLabelMedianScoreWeek = findViewById(R.id.labelMedianScoreWeek);
-        textViewLabelLatestScore = findViewById(R.id.labelLatestScore);
         textViewLabelCurrentGoal = findViewById(R.id.labelCurrentGoal);
         textViewLabelCurrentScore = findViewById(R.id.labelCurrentScore);
 
@@ -200,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
         textViewValueBestScoreWeek = findViewById(R.id.valueBestScoreWeek);
         textViewValueAverageScoreWeek = findViewById(R.id.valueAverageScoreWeek);
         textViewValueMedianScoreWeek = findViewById(R.id.valueMedianScoreWeek);
-        textViewValueLatestScore = findViewById(R.id.valueLatestScore);
         textViewValueCurrentGoal = findViewById(R.id.valueCurrentGoal);
         textViewValueCurrentScore = findViewById(R.id.valueCurrentScore);
 
@@ -216,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
         textViewPercentBestScoreWeek = findViewById(R.id.percentBestScoreWeek);
         textViewPercentAverageScoreWeek = findViewById(R.id.percentAverageScoreWeek);
         textViewPercentMedianScoreWeek = findViewById(R.id.percentMedianScoreWeek);
-        textViewPercentLatestScore = findViewById(R.id.percentLatestScore);
         textViewPercentCurrentGoal = findViewById(R.id.percentCurrentGoal);
         textViewPercentCurrentScore = findViewById(R.id.percentCurrentScore);
         button = findViewById(R.id.buttonImSmoking);
@@ -505,7 +494,6 @@ public class MainActivity extends AppCompatActivity {
         db.close();
 
         lastTimestamp = getLastTimestampInDb();
-        latestScore = calculateLatestScore();
         updateFront();
     }
 
@@ -522,22 +510,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // updateCurrentScore()
                 double currentScore = calculateTimeSinceLastSmoke(lastTimestamp);
-                percentCurrentScore = (((
-                                percentBestScoreAll +
-                                percentAverageScoreAll +
-                                percentMedianScoreAll +
-                                        percentBestScoreYear +
-                                        percentAverageScoreYear +
-                                        percentMedianScoreYear +
-                                        percentBestScoreMonth +
-                                        percentAverageScoreMonth +
-                                        percentMedianScoreMonth +
-                                        percentBestScoreWeek +
-                                        percentAverageScoreWeek +
-                                        percentMedianScoreWeek
-                ) / 12) + percentLatestScore + percentCurrentGoal)/3;
+                percentCurrentScore = percentCurrentGoal;
                 formatRow(currentScore, textViewStatusCurrentScore, textViewLabelCurrentScore, textViewValueCurrentScore, textViewPercentCurrentScore, currentScore, percentCurrentScore);
-                formatRow(currentScore, textViewStatusLatestScore, textViewLabelLatestScore, textViewValueLatestScore, textViewPercentLatestScore, latestScore, percentLatestScore);
                 double percent = percentCurrentScore;
                 if (percent < 20) {
                     button.setBackgroundColor(getResources().getColor(R.color.red));
@@ -559,82 +533,90 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateScores(String scope) {
         double currentScore = calculateTimeSinceLastSmoke(lastTimestamp);
+
+        double bestScoreAll = getBestTime("all");
         double averageScoreAll = getAverageTime("all");
         double medianScoreAll = getMedianTime("all");
+
+        double bestScoreYear = getBestTime("year");
         double averageScoreYear = getAverageTime("year");
         double medianScoreYear = getMedianTime("year");
+
+        double bestScoreMonth = getBestTime("month");
         double averageScoreMonth = getAverageTime("month");
         double medianScoreMonth = getMedianTime("month");
+
+        double bestScoreWeek = getBestTime("week");
         double averageScoreWeek = getAverageTime("week");
         double medianScoreWeek = getMedianTime("week");
-        double bestScoreAll = getBestTime("all");
-        double bestScoreYear = getBestTime("year");
-        double bestScoreMonth = getBestTime("month");
-        double bestScoreWeek = getBestTime("week");
+
         double standardDeviation = getStandardDeviation("all");
         SharedPreferences sharedPreferences = getSharedPreferences("SmokelessPrefs", MODE_PRIVATE);
         int difficultyLevel = sharedPreferences.getInt("difficultyLevel", 0);
-        double currentGoal = averageScoreAll + standardDeviation * difficultyLevel;
+        double currentGoal = medianScoreAll + standardDeviation * difficultyLevel;
 
         percentBestScoreAll = (currentScore / bestScoreAll) * 100;
         percentAverageScoreAll = (currentScore / averageScoreAll) * 100;
         percentMedianScoreAll = (currentScore / medianScoreAll) * 100;
+
         percentBestScoreYear = (currentScore / bestScoreYear) * 100;
         percentAverageScoreYear = (currentScore / averageScoreYear) * 100;
         percentMedianScoreYear = (currentScore / medianScoreYear) * 100;
+
         percentBestScoreMonth = (currentScore / bestScoreMonth) * 100;
         percentAverageScoreMonth = (currentScore / averageScoreMonth) * 100;
         percentMedianScoreMonth = (currentScore / medianScoreMonth) * 100;
+
         percentBestScoreWeek = (currentScore / bestScoreWeek) * 100;
         percentAverageScoreWeek = (currentScore / averageScoreWeek) * 100;
         percentMedianScoreWeek = (currentScore / medianScoreWeek) * 100;
-        percentLatestScore = (currentScore / latestScore) * 100;
+
         percentCurrentGoal = (currentScore / currentGoal) * 100;
 
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         boolean isStrictModeEnabled = sharedPreferences.getBoolean(KEY_STRICT_MODE, false);
         if (isStrictModeEnabled) {
-            if (percentBestScoreAll > 100) {
+            if ((percentBestScoreAll) > (double) 100) {
                 percentBestScoreAll = 100;
             }
-            if (percentAverageScoreAll > 100) {
+            if (percentAverageScoreAll > (double) 100) {
                 percentAverageScoreAll = 100;
             }
-            if (percentMedianScoreAll > 100) {
+            if (percentMedianScoreAll > (double) 100) {
                 percentMedianScoreAll = 100;
             } 
-            if (percentBestScoreYear > 100) {
+            if (percentBestScoreYear > (double) 100) {
                 percentBestScoreYear = 100;
             }
-            if (percentAverageScoreYear > 100) {
+            if (percentAverageScoreYear > (double) 100) {
                 percentAverageScoreYear = 100;
             }
-            if (percentMedianScoreYear > 100) {
+            if (percentMedianScoreYear > (double) 100) {
                 percentMedianScoreYear = 100;
-            } 
-            if (percentBestScoreMonth > 100) {
-                percentBestScoreMonth = 100;
-            }
-            if (percentAverageScoreMonth > 100) {
-                percentAverageScoreMonth = 100;
-            }
-            if (percentMedianScoreMonth > 100) {
-                percentMedianScoreMonth = 100;
-            } 
-            if (percentBestScoreWeek > 100) {
-                percentBestScoreWeek = 100;
-            }
-            if (percentAverageScoreWeek > 100) {
-                percentAverageScoreWeek = 100;
-            }
-            if (percentMedianScoreWeek > 100) {
-                percentMedianScoreWeek = 100;
-            }
-            if (percentLatestScore > 100) {
-                percentLatestScore = 100;
             }
 
-            if (percentCurrentGoal > 100) {
+            if (percentBestScoreMonth > (double) 100) {
+                percentBestScoreMonth = 100;
+            }
+            if (percentAverageScoreMonth > (double) 100) {
+                percentAverageScoreMonth = 100;
+            }
+            if (percentMedianScoreMonth > (double) 100) {
+                percentMedianScoreMonth = 100;
+            }
+
+            if (percentBestScoreWeek > (double) 100) {
+                percentBestScoreWeek = 100;
+            }
+            if (percentAverageScoreWeek > (double) 100) {
+                percentAverageScoreWeek = 100;
+            }
+            if (percentMedianScoreWeek > (double) 100) {
+                percentMedianScoreWeek = 100;
+            }
+
+
+            if (percentCurrentGoal > (double) 100) {
                 percentCurrentGoal = 100;
             }
         }
@@ -661,6 +643,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void formatRow(double currentScore, TextView tVStatus, TextView tVLabel, TextView tVValue,
                            TextView tVPercent, double score, double percent) {
+            //log
             if (percent < 20) {
                 tVStatus.setText("🔴");
                 tVLabel.setTextColor(getResources().getColor(R.color.red));
@@ -687,6 +670,23 @@ public class MainActivity extends AppCompatActivity {
                 tVValue.setTextColor(getResources().getColor(R.color.green));
                 tVPercent.setTextColor(getResources().getColor(R.color.green));
             } else {
+                SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+                boolean strictModeEnabled = sharedPreferences.getBoolean(KEY_STRICT_MODE, false);
+
+                if (percent >= 100.0 && strictModeEnabled) {
+                    Log.d("formatRow", "currentScore: " + currentScore + " score: " + score + " percent: " + percent);
+
+                    percent = 100.0;
+                    tVStatus.setText("🏆");
+                    tVLabel.setTextColor(getResources().getColor(R.color.green));
+                    tVValue.setTextColor(getResources().getColor(R.color.green));
+                    tVPercent.setTextColor(getResources().getColor(R.color.green));
+                } else {
+                    tVStatus.setText("🟢");
+                    tVLabel.setTextColor(getResources().getColor(R.color.green));
+                    tVValue.setTextColor(getResources().getColor(R.color.green));
+                    tVPercent.setTextColor(getResources().getColor(R.color.green));
+                }
                 tVStatus.setText("🏆");
                 tVLabel.setTextColor(getResources().getColor(R.color.green));
                 tVValue.setTextColor(getResources().getColor(R.color.green));
